@@ -21,7 +21,8 @@ def create_user():
     init_db()
     #session.add(User(username='admin', email='admin@localhost'))
     #user_datastore.create_user(email='matt@nobien.net', password='password')
-    db_session.commit()
+    #db_session.commit()
+
 
 
 
@@ -35,6 +36,9 @@ def register_page():
 def login_page():
     return render_template('security/login_user.html')
 
+@app.route('/speech')
+def speech():
+    return render_template('/speech-to-text.html')
 
 @app.route('/')
 @login_required
