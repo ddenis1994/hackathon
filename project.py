@@ -1,12 +1,14 @@
 from flask import Flask, template_rendered, flash, request, render_template
 from flask_security import Security, login_required, \
      SQLAlchemySessionUserDatastore,login_user,current_user
+from flask_mail import Mail
 from DBLocal.database import db_session, init_db, Session
 from DBLocal.models import User, Role
 from flask_sqlalchemy import SQLAlchemy
 
 # Create app
 app = Flask(__name__)
+mail = Mail(app)
 # Setup Flask-Security
 user_datastore = SQLAlchemySessionUserDatastore(db_session,
                                                 User, Role)
@@ -56,7 +58,7 @@ def login(user_name, password):
 
 
 def register(user, password, permissions, Email):
-    user_datastore.create_user(username=user, password=password,email=Email)
+    user_datastore.create_user(username=user, password=password, email=Email)
     user_datastore.add_role_to_user(user=user, role=permissions)
     db_session.commit()
     login_user(User.query.filter_by(username=user).first())
