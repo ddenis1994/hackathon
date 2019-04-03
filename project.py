@@ -4,6 +4,8 @@ from flask_security import Security, login_required, \
 from flask_mail import Mail
 from DBLocal.database import db_session, init_db, Session
 from DBLocal.models import User, Role
+import numpy as np
+import sounddevice as sd
 from flask_sqlalchemy import SQLAlchemy
 
 # Create app
@@ -20,7 +22,7 @@ session = Session()
 def create_user():
     init_db()
     #session.add(User(username='admin', email='admin@localhost'))
-    #user_datastore.create_user(email='matt@nobien.net', password='password')
+    user_datastore.create_user(email='matt@nobien.net', password='password')
     db_session.commit()
 
 
@@ -73,6 +75,25 @@ def handle_data():
     elif request.form['type_form'] == 'register':
         return register(request.form['Register_New_User'], request.form['Register_New_Password'],request.form['permissions'],request.form['Email'])
     return index()
+
+
+
+duration = 3  # in seconds
+volume_list = []
+
+
+def audio_callback(indata, frames, time, status):
+    volume_norm = np.linalg.norm(indata) * 10
+    volume_list.append(int(volume_norm))
+    # print(int(volume_norm))
+
+
+stream = sd.InputStream(callback=audio_callback)
+with stream:
+    sd.sleep(duration * 1000)
+    # print(sum(volume_list)/len(volume_list))
+    print(max(volume_list))
+
 
 
 if __name__ == '__main__':
