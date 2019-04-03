@@ -1,6 +1,8 @@
 
 <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
-
+  {% for message in get_flashed_messages() %}
+    <div style="color:#ff0000" class="flash">{{ message }}</div>
+  {% endfor %}
 <button type="button" id="startRec">Start</button>
 <button type="button" id="stopRec" disabled>stop</button>
 <script>
@@ -20,7 +22,15 @@ $("#startRec").click(function(){
     mediaRecorder.stop();
       mediaRecorder.addEventListener("stop", () => {
         const audioBlob = new Blob(audioChunks);
-
+         $.ajax({
+    type: 'POST',
+    url: "{{ url_for('audio') }}",
+    data: audioBlob,
+    processData: false,
+    contentType: false
+}).done(function(data) {
+       console.log(data);
+});
          document.getElementById("stopRec").disabled = true;
       });
     });

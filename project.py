@@ -5,7 +5,7 @@ from flask_mail import Mail
 from speech_recognition import Microphone
 from DBLocal.database import db_session, init_db, Session
 from DBLocal.models import User, Role
-
+import speech_recognition as sr
 
 # Create app
 app = Flask(__name__)
@@ -42,8 +42,11 @@ def speech():
 
 
 @app.route('/audio', methods=['POST','GET'] )
-def audio(data):
-    return data
+def audio():
+    r = sr.Recognizer()
+    data = request.data
+    flash(r.recognize_google(data))
+    return "dani"
 
 @app.route('/')
 @login_required
