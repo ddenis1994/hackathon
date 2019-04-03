@@ -1,10 +1,11 @@
-from flask import Flask, template_rendered, flash, request, render_template
+from flask import Flask, flash, request, render_template, Response, stream_with_context
 from flask_security import Security, login_required, \
-     SQLAlchemySessionUserDatastore,login_user,current_user
+     SQLAlchemySessionUserDatastore, login_user, current_user
 from flask_mail import Mail
+from speech_recognition import Microphone
 from DBLocal.database import db_session, init_db, Session
 from DBLocal.models import User, Role
-from flask_sqlalchemy import SQLAlchemy
+
 
 # Create app
 app = Flask(__name__)
@@ -25,8 +26,6 @@ def create_user():
 
 
 
-
-
 @app.route('/register')
 def register_page():
     return render_template('security/register_user.html')
@@ -39,6 +38,12 @@ def login_page():
 @app.route('/speech')
 def speech():
     return render_template('/speech-to-text.html')
+
+
+
+@app.route('/audio', methods=['POST','GET'] )
+def audio(data):
+    return data
 
 @app.route('/')
 @login_required
@@ -68,6 +73,9 @@ def register(user, password, permissions, Email):
     login_user(User.query.filter_by(username=user).first())
     return index()
 
+def use_date():
+    return
+
 
 @app.route('/handle_data', methods=['POST'])
 def handle_data():
@@ -76,7 +84,42 @@ def handle_data():
         return login(request.form['inputIdMain'], request.form['inputPasswordMain'])
     elif request.form['type_form'] == 'register':
         return register(request.form['Register_New_User'], request.form['Register_New_Password'],request.form['permissions'],request.form['Email'])
+    elif request.form['type_form'] == 'getSound':
+        return use_date()
     return index()
+
+
+@app.route('/record_page')
+def record_page():
+    return render_template('/record.html')
+
+
+def levenshteinDistance(s1, s2):
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1
+    distances = range(len(s1) + 1)
+    for i2, c2 in enumerate(s2):
+        distances_ = [i2+1]
+        for i1, c1 in enumerate(s1):
+            if c1 == c2:
+                distances_.append(distances[i1])
+            else:
+                distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+        distances = distances_
+    return distances[-1]
+
+
+@app.route('/audiofeed')
+def audiofeed():
+    def gen(microphone):
+        while True:
+            sound = microphone.getSound()
+            #with open('tmp.wav', 'rb') as myfile:
+            #   yield myfile.read()
+
+            yield sound
+
+    return Response(stream_with_context(gen(Microphone())))
 
 
 if __name__ == '__main__':
