@@ -1,0 +1,33 @@
+
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+
+<button type="button" id="startRec">Start</button>
+<button type="button" id="stopRec" disabled>stop</button>
+<script>
+const mediaRecorder= null;
+$("#startRec").click(function(){
+ document.getElementById("stopRec").disabled = false;
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.start();
+      const audioChunks = [];
+      mediaRecorder.addEventListener("dataavailable", event => {
+        audioChunks.push(event.data);
+      });
+    $("#stopRec").click(function(){
+    navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaRecorder.stop();
+      mediaRecorder.addEventListener("stop", () => {
+        const audioBlob = new Blob(audioChunks);
+
+         document.getElementById("stopRec").disabled = true;
+      });
+    });
+
+    });
+  });
+
+
+
+ </script>

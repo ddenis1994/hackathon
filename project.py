@@ -1,12 +1,11 @@
-from flask import Flask, template_rendered, flash, request, render_template
+from flask import Flask, flash, request, render_template, Response, stream_with_context
 from flask_security import Security, login_required, \
-     SQLAlchemySessionUserDatastore,login_user,current_user
+     SQLAlchemySessionUserDatastore, login_user, current_user
 from flask_mail import Mail
+from speech_recognition import Microphone
 from DBLocal.database import db_session, init_db, Session
 from DBLocal.models import User, Role
-import numpy as np
-import sounddevice as sd
-from flask_sqlalchemy import SQLAlchemy
+
 
 # Create app
 app = Flask(__name__)
@@ -22,9 +21,8 @@ session = Session()
 def create_user():
     init_db()
     #session.add(User(username='admin', email='admin@localhost'))
-    user_datastore.create_user(email='matt@nobien.net', password='password')
-    db_session.commit()
-
+    #user_datastore.create_user(email='matt@nobien.net', password='password')
+    #db_session.commit()
 
 
 
@@ -37,6 +35,15 @@ def register_page():
 def login_page():
     return render_template('security/login_user.html')
 
+@app.route('/speech')
+def speech():
+    return render_template('/speech-to-text.html')
+
+
+
+@app.route('/audio', methods=['POST','GET'] )
+def audio(data):
+    return data
 
 @app.route('/')
 @login_required
@@ -66,6 +73,9 @@ def register(user, password, permissions, Email):
     login_user(User.query.filter_by(username=user).first())
     return index()
 
+def use_date():
+    return
+
 
 @app.route('/handle_data', methods=['POST'])
 def handle_data():
@@ -74,26 +84,42 @@ def handle_data():
         return login(request.form['inputIdMain'], request.form['inputPasswordMain'])
     elif request.form['type_form'] == 'register':
         return register(request.form['Register_New_User'], request.form['Register_New_Password'],request.form['permissions'],request.form['Email'])
+    elif request.form['type_form'] == 'getSound':
+        return use_date()
     return index()
 
 
-
-duration = 3  # in seconds
-volume_list = []
-
-
-def audio_callback(indata, frames, time, status):
-    volume_norm = np.linalg.norm(indata) * 10
-    volume_list.append(int(volume_norm))
-    # print(int(volume_norm))
+@app.route('/record_page')
+def record_page():
+    return render_template('/record.html')
 
 
-stream = sd.InputStream(callback=audio_callback)
-with stream:
-    sd.sleep(duration * 1000)
-    # print(sum(volume_list)/len(volume_list))
-    print(max(volume_list))
+def levenshteinDistance(s1, s2):
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1
+    distances = range(len(s1) + 1)
+    for i2, c2 in enumerate(s2):
+        distances_ = [i2+1]
+        for i1, c1 in enumerate(s1):
+            if c1 == c2:
+                distances_.append(distances[i1])
+            else:
+                distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+        distances = distances_
+    return distances[-1]
 
+
+@app.route('/audiofeed')
+def audiofeed():
+    def gen(microphone):
+        while True:
+            sound = microphone.getSound()
+            #with open('tmp.wav', 'rb') as myfile:
+            #   yield myfile.read()
+
+            yield sound
+
+    return Response(stream_with_context(gen(Microphone())))
 
 
 if __name__ == '__main__':
