@@ -1,3 +1,6 @@
 flask
+flask-admin
+flask-sqlAlchemy
 flask_security
-sqlalchemy
+sqlAlchemy
+nose
