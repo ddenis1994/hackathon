@@ -28,7 +28,7 @@ def create_user():
 
 @app.route('/register')
 def register_page():
-    return render_template('register.html')
+    return render_template('security/register_user.html')
 
 
 @app.route('/login')
