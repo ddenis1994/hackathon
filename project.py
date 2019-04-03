@@ -1,6 +1,6 @@
-from flask import Flask, template_rendered, flash
+from flask import Flask, template_rendered, flash, request, render_template
 from flask_security import Security, login_required, \
-     SQLAlchemySessionUserDatastore
+     SQLAlchemySessionUserDatastore,login_user,current_user
 from DBLocal.database import db_session, init_db, Session
 from DBLocal.models import User, Role
 from flask_sqlalchemy import SQLAlchemy
@@ -22,16 +22,32 @@ def create_user():
     db_session.commit()
 
 
-# Views
+
+
+@app.route('/register')
+def register_page():
+    return render_template('register.html')
+
+
+@app.route('/login')
+def login_page():
+    return render_template('security/login_user.html')
+
+
 @app.route('/')
 @login_required
-def home():
-    result = User.query.filter_by(username='admin').first()
-    return template_rendered('Here you go!')
+def index():
+    if current_user.is_authenticated:
+        if 'ADMIN' in current_user.roles:
+            return render_template('status/admin_login.html')
+        if 'MANAGER' in current_user.roles:
+            return render_template('status/parent_login.html')
+        return render_template('status/normal_login.html')
+    return index()
 
 
-@app.route('/login_submit')
-def login_submit(user_name, password):
+
+def login(user_name, password):
     result = User.query.filter_by(username=user_name).first()
     if result == "None":
         flash("wrong user name", category="login")
@@ -39,6 +55,23 @@ def login_submit(user_name, password):
     if result.password == password:
         return index()
 
+
+def register(user, password, permissions, Email):
+    user_datastore.create_user(username=user, password=password,email=Email)
+    user_datastore.add_role_to_user(user=user, role=permissions)
+    db_session.commit()
+    login_user(User.query.filter_by(username=user).first())
+    return index()
+
+
+@app.route('/handle_data', methods=['POST'])
+def handle_data():
+    # redirect the date for the correct func
+    if request.form['type_form'] == 'login':
+        return login(request.form['inputIdMain'], request.form['inputPasswordMain'])
+    elif request.form['type_form'] == 'register':
+        return register(request.form['Register_New_User'], request.form['Register_New_Password'],request.form['permissions'],request.form['Email'])
+    return index()
 
 
 if __name__ == '__main__':
