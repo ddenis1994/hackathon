@@ -1,8 +1,8 @@
-from flask import Flask
+from flask import Flask,template_rendered
 from flask_security import Security, login_required, \
      SQLAlchemySessionUserDatastore
-from database import db_session, init_db
-from models import User, Role
+from DBLocal.database import db_session, init_db
+from DBLocal.models import User, Role
 
 # Create app
 app = Flask(__name__)
@@ -25,7 +25,7 @@ def create_user():
 @app.route('/')
 @login_required
 def home():
-    return render('Here you go!')
+    return template_rendered('Here you go!')
 
 if __name__ == '__main__':
     app.run()
