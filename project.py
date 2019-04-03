@@ -46,12 +46,11 @@ def index():
     return index()
 
 
-
 def login(user_name, password):
     result = User.query.filter_by(username=user_name).first()
     if result == "None":
         flash("wrong user name", category="login")
-        return home()
+        return index()
     if result.password == password:
         return index()
 
