@@ -9,7 +9,8 @@
 
 
 {% block content %}
-<div id="mainGame">
+
+<div >
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <div class="container ">
@@ -19,13 +20,21 @@
     <h1>Phrase matcher</h1>
     <p style="font-size:35px;color:blue;">Press the button then say the phrase to test the recognition.</p>
     <p style="font-size:15px;color:#d923b9;">Your score is between 1 and 10.</p>
-    <button id="mainbutton" class="fa fa-microphone" style="font-size:48px;color:blue;"  >Start new test</button>
+    <a  href="https://www.sela.org.il/%D7%AA%D7%A8%D7%92%D7%95%D7%9D-%D7%95%D7%AA%D7%9E%D7%9C%D7%95%D7%9C-%D7%9E%D7%A8%D7%97%D7%95%D7%A7/%D7%94%D7%95%D7%A8%D7%93%D7%AA-%D7%94%D7%AA%D7%95%D7%9B%D7%A0%D7%94-%D7%9C%D7%AA%D7%A8%D7%92%D7%95%D7%9D-%D7%9E%D7%A8%D7%97%D7%95%D7%A7/">download video chat with sign language translator</a>
+               </br> <select id="userReturn">
+  <option value="">choose language</option>
+  <option value="en-US">english</option>
+  <option value="he-IL">hebrew</option>
+  <option value="ar-IL">arabic</option>
+</select></br>
+                   <button id="mainbutton" class="fa fa-microphone" style="font-size:48px;color:blue;"  >Start new test</button>
 
     <div id="text-id" style="font-size:30px">
         <p class="phrase">Phrase...</p>
         <p class="result"></p>
-        <p class="output"></p>
+        <p class="output" id="mainGame"></p>
     </div>
+
      <svg preserveAspectRatio="none" id="visualizer" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
             <defs>
 
@@ -54,7 +63,9 @@
 
 <script >
 
-function editDistance(a, b) {
+function editDistance(a, b,leng) {
+if(leng!='en-US')
+return '';
   // Create empty edit distance matrix for all possible modifications of
   // substrings of a to substrings of b.
   const distanceMatrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
@@ -91,36 +102,54 @@ function editDistance(a, b) {
         var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
         var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
         var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
-
-        var phrases = [
-            'I love',
-            'can I',
+function phrases(leng){
+        var phrases1 = [
+            'i love',
+            'can i',
             'why did you',
-            'she',
+            'she go',
             'where are you going',
-            'have',
+            'have it',
             'she sells'
         ];
 
+
+                var phrases2 = [
+            'נמצא מאגר מידע',
+            'נגישות',
+            'מה אני עושה',
+        ];
+         var phrases3 = [
+            'مرحبا',
+
+        ];
+        if (leng=='en-US')
+            return phrases1
+        else if(leng=='he-IL')
+            return phrases2
+        else
+            return phrases3
+
+}
         var phrasePara = document.querySelector('.phrase');
         var resultPara = document.querySelector('.result');
         var diagnosticPara = document.querySelector('.output');
 
         var testBtn = document.querySelector('button');
 
-        function randomPhrase() {
-            var number = Math.floor(Math.random() * phrases.length);
+        function randomPhrase(leng) {
+            var number = Math.floor(Math.random() * phrases(leng).length);
             return number;
         }
 
-        function testSpeech() {
+        function testSpeech(leng) {
             document.body.style.backgroundColor = 'white';
             testBtn.disabled = true;
             testBtn.textContent = 'Test in progress';
             $("#mainbutton").css('color','purple');
-            var phrase = phrases[randomPhrase()];
+            var phrase = phrases(leng)[randomPhrase(leng)];
             // To ensure case consistency while checking with the returned output text
-            phrase = phrase.toLowerCase();
+            //phrase = phrase.toLowerCase();
             phrasePara.textContent = phrase;
             resultPara.textContent = '';
             resultPara.style.background = 'rgba(0,0,0,0.2)';
@@ -131,7 +160,7 @@ function editDistance(a, b) {
             var speechRecognitionList = new SpeechGrammarList();
             speechRecognitionList.addFromString(grammar, 1);
             recognition.grammars = speechRecognitionList;
-            recognition.lang = 'en-US';
+            recognition.lang = leng;
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
@@ -153,7 +182,7 @@ function editDistance(a, b) {
                     resultPara.textContent = 'I heard the correct phrase! your score is : 10';
                     $("#mainGame").css("background-color", 'lime');
                 } else {
-                    resultPara.textContent = 'That didn\'t sound right. your score is : '+editDistance(phrase,speechResult);
+                    resultPara.textContent = 'That didn\'t sound right. your score is : '+editDistance(phrase,speechResult,leng);
                     $("#mainGame").css("background-color", 'red');
                 }
 
@@ -214,9 +243,14 @@ function editDistance(a, b) {
 
         $(document).ready(function(){
             $("#mainbutton").click(function(){
-                 testSpeech();
+            var leng='en-US';
+            var option = document.getElementById("userReturn").value;
+            if (option!='')
+              leng=option;
+                 testSpeech(leng);
                   $(this).css('color','purple');
                     document.body.style.backgroundColor = 'white';
+
             });
         });
 
@@ -224,7 +258,7 @@ function editDistance(a, b) {
     </script>
 
 
-<
+
 
      {% endblock %}
 

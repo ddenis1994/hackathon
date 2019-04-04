@@ -37,11 +37,17 @@
 </nav>
 
 
+
   {% for message in get_flashed_messages() %}
     <div style="color:#ff0000" class="flash">{{ message }}</div>
   {% endfor %}
 
 {% block content %}
+    <div>
+        <label>
+            what i can do asdjklasjdkoasjdklasjdk
+        </label>
+    </div>
      {% endblock %}
 
 {% block scripts %}
