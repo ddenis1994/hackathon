@@ -11,6 +11,7 @@
 {% block content %}
 
 <div >
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' integrity='sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ' crossorigin='anonymous'>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <div class="container ">
@@ -33,7 +34,10 @@
         <p class="phrase">Phrase...</p>
         <p class="result"></p>
         <p class="output" id="mainGame"></p>
-    </div>
+        <div class="row justify-content-md-center">
+        <button id="good" style='font-size:50px;background-color:green;'disabled><i class='far fa-thumbs-up'></i></button>
+        <button id="bad" style='font-size:50px;background-color:red;'disabled><i class='far fa-thumbs-down'></i></button>
+    </div></div>
 
      <svg preserveAspectRatio="none" id="visualizer" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
             <defs>
@@ -64,8 +68,8 @@
 <script >
 
 function editDistance(a, b,leng) {
-if(leng!='en-US')
-return '';
+//if(leng!='en-US')
+//return '';
   // Create empty edit distance matrix for all possible modifications of
   // substrings of a to substrings of b.
   const distanceMatrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
@@ -95,7 +99,7 @@ return '';
     }
   }
 
-  return distanceMatrix[b.length][a.length];
+  return (1-(distanceMatrix[b.length][a.length]/Math.max(b.length,a.length)))*10;
 }
 
 
@@ -181,11 +185,13 @@ function phrases(leng){
                 if (speechResult === phrase) {
                     resultPara.textContent = 'I heard the correct phrase! your score is : 10';
                     $("#mainGame").css("background-color", 'lime');
-                } else {
-                    resultPara.textContent = 'That didn\'t sound right. your score is : '+editDistance(phrase,speechResult,leng);
-                    $("#mainGame").css("background-color", 'red');
-                }
+                            document.getElementById('good').style.visibility = 'visible';
 
+                } else {
+                    resultPara.textContent = 'That didn\'t sound right. your score is : '+ Math.round(editDistance(((phrase)),((speechResult)),leng));
+                    $("#mainGame").css("background-color", 'red');
+                    document.getElementById('bad').style.visibility = 'visible';
+                }
                 console.log('Confidence: ' + event.results[0][0].confidence);
             }
 
@@ -242,7 +248,11 @@ function phrases(leng){
         }
 
         $(document).ready(function(){
+        document.getElementById('good').style.visibility = 'hidden';
+        document.getElementById('bad').style.visibility = 'hidden';
             $("#mainbutton").click(function(){
+                    document.getElementById('good').style.visibility = 'hidden';
+        document.getElementById('bad').style.visibility = 'hidden';
             var leng='en-US';
             var option = document.getElementById("userReturn").value;
             if (option!='')
