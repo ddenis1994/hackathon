@@ -4,7 +4,7 @@ pipeline {
         stage('Git') {
             steps{
                 // echo 'Getting the code from GitHub...'
-                git 'https://github.com/daniera3/NEDD-API-server.git'
+                git 'https://github.com/ddenis1994/hakatron.git'
             }
         }
         stage('Requirements'){
