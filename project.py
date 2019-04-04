@@ -1,8 +1,8 @@
-from flask import Flask, flash, request, render_template, Response, stream_with_context
+from flask import Flask, flash, request, render_template
 from flask_security import Security, login_required, \
      SQLAlchemySessionUserDatastore, login_user, current_user,logout_user
 from flask_mail import Mail
-from model.crypto2 import des, des_dicrypte
+from crypto2 import des, des_dicrypte
 from DBLocal.database import db_session, init_db, Session
 from DBLocal.models import User, Role
 
@@ -21,7 +21,7 @@ key = "NEDDNEDD"
 @app.before_first_request
 def create_user():
     init_db()
-    #user_datastore.create_role(name='ADMIN')
+    #user_datastore.create_role(name='manger')
     #db_session.commit()
     #user_datastore.create_user(email='admin', password=des('admin', key), roles=['ADMIN'])
     #db_session.commit()
@@ -66,9 +66,10 @@ def login(user_name, password):
 
 def register(user, password, permissions, Email):
     user_datastore.create_user(username=user, password=des(password, key), email=Email)
+    db_session.commit()
     user_datastore.add_role_to_user(user=user, role=permissions)
     db_session.commit()
-    login_user(User.query.filter_by(username=user).first())
+    login_user(User.query.filter_by(email=user).first())
     return index()
 
 
