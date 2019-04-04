@@ -78,6 +78,12 @@ def get_sound():
     return render_template('/record.html')
 
 
+@app.route('/statist_page')
+def statist_page():
+    return render_template('/status/normal_features/statistic.html')
+
+
+
 @app.route('/handle_data', methods=['POST'])
 def handle_data():
     # redirect the date for the correct func
