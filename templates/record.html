@@ -5,6 +5,7 @@
   {% endfor %}
 <button type="button" id="startRec">Start</button>
 <button type="button" id="stopRec" disabled>stop</button>
+ <audio id=recordedAudio></audio>
 <script>
 const mediaRecorder= null;
 $("#startRec").click(function(){
@@ -21,15 +22,25 @@ $("#startRec").click(function(){
     navigator.mediaDevices.getUserMedia({ audio: true })
     mediaRecorder.stop();
       mediaRecorder.addEventListener("stop", () => {
-        const audioBlob = new Blob(audioChunks);
+        const audioBlob = new Blob(audioChunks, {type : 'audio/mpeg-3'});
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play();
          $.ajax({
     type: 'POST',
     url: "{{ url_for('audio') }}",
-    data: audioBlob,
+    data: audio,
     processData: false,
-    contentType: false
+    contentType: false,
+    success: function(data) {
+            alert( data);
+        },
+        error: function() {
+            alert('Error occured');
+        }
 }).done(function(data) {
        console.log(data);
+       alert(data);
 });
          document.getElementById("stopRec").disabled = true;
       });

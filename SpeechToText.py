@@ -4,7 +4,7 @@ with sr.Microphone() as source:
     print("SPELL A");
     audio=r.listen(source)
     print("TIME OVER, THANKS")
-
+print(type(audio))
 try:
     print("You Said: "+r.recognize_google(audio))
     if(r.recognize_google(audio)=='hey'):

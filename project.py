@@ -1,3 +1,5 @@
+import base64
+
 from flask import Flask, flash, request, render_template, Response, stream_with_context
 from flask_security import Security, login_required, \
      SQLAlchemySessionUserDatastore, login_user, current_user
@@ -6,6 +8,7 @@ from speech_recognition import Microphone
 from DBLocal.database import db_session, init_db, Session
 from DBLocal.models import User, Role
 import speech_recognition as sr
+
 
 # Create app
 app = Flask(__name__)
@@ -45,8 +48,15 @@ def speech():
 def audio():
     r = sr.Recognizer()
     data = request.data
-    flash(r.recognize_google(data))
-    return "dani"
+    return str(type(data))
+    try:
+        date=sr.AudioData(data,1,1)
+        massge=r.recognize_google(date,None,"he-IL")
+    except:
+        date=AudioSegment.from_mono_audiosegments(data)
+        date=sr.AudioData(date,1,2)
+        massge=r.recognize_google(date,None,"he-IL")
+    return str(massge)
 
 @app.route('/')
 @login_required
@@ -76,8 +86,6 @@ def register(user, password, permissions, Email):
     login_user(User.query.filter_by(username=user).first())
     return index()
 
-def use_date():
-    return
 
 
 @app.route('/handle_data', methods=['POST'])
