@@ -1,13 +1,10 @@
-import base64
-
 from flask import Flask, flash, request, render_template, Response, stream_with_context
 from flask_security import Security, login_required, \
-     SQLAlchemySessionUserDatastore, login_user, current_user
+     SQLAlchemySessionUserDatastore, login_user, current_user,logout_user
 from flask_mail import Mail
-from speech_recognition import Microphone
+from model.crypto2 import des, des_dicrypte
 from DBLocal.database import db_session, init_db, Session
 from DBLocal.models import User, Role
-import speech_recognition as sr
 
 
 # Create app
@@ -18,14 +15,16 @@ user_datastore = SQLAlchemySessionUserDatastore(db_session,
                                                 User, Role)
 security = Security(app, user_datastore)
 session = Session()
+key = "NEDDNEDD"
 
 # Create a user to test with
 @app.before_first_request
 def create_user():
     init_db()
-    #session.add(User(username='admin', email='admin@localhost'))
-    #user_datastore.create_user(email='matt@nobien.net', password='password')
-    #db_session.commit()
+    user_datastore.create_role(name='ADMIN')
+    db_session.commit()
+    user_datastore.create_user(email='admin', password=des('admin', key), roles=['ADMIN'])
+    db_session.commit()
 
 
 
@@ -43,21 +42,6 @@ def speech():
     return render_template('/speech-to-text.html')
 
 
-
-@app.route('/audio', methods=['POST','GET'] )
-def audio():
-    r = sr.Recognizer()
-    data = request.data
-    return str(type(data))
-    try:
-        date=sr.AudioData(data,1,1)
-        massge=r.recognize_google(date,None,"he-IL")
-    except:
-        date=AudioSegment.from_mono_audiosegments(data)
-        date=sr.AudioData(date,1,2)
-        massge=r.recognize_google(date,None,"he-IL")
-    return str(massge)
-
 @app.route('/')
 @login_required
 def index():
@@ -71,21 +55,25 @@ def index():
 
 
 def login(user_name, password):
-    result = User.query.filter_by(username=user_name).first()
-    if result == "None":
+    result = User.query.filter_by(email=user_name).first()
+    if result == None:
         flash("wrong user name", category="login")
-        return index()
-    if result.password == password:
-        return index()
+        return login_page()
+    if des_dicrypte(result.password, key) == password:
+        login_user(result)
+    return index()
 
 
 def register(user, password, permissions, Email):
-    user_datastore.create_user(username=user, password=password, email=Email)
+    user_datastore.create_user(username=user, password=des(password, key), email=Email)
     user_datastore.add_role_to_user(user=user, role=permissions)
     db_session.commit()
     login_user(User.query.filter_by(username=user).first())
     return index()
 
+
+def get_sound():
+    return render_template('/')
 
 
 @app.route('/handle_data', methods=['POST'])
@@ -96,7 +84,7 @@ def handle_data():
     elif request.form['type_form'] == 'register':
         return register(request.form['Register_New_User'], request.form['Register_New_Password'],request.form['permissions'],request.form['Email'])
     elif request.form['type_form'] == 'getSound':
-        return use_date()
+        return getSound()
     return index()
 
 
@@ -105,32 +93,10 @@ def record_page():
     return render_template('/record.html')
 
 
-def levenshteinDistance(s1, s2):
-    if len(s1) > len(s2):
-        s1, s2 = s2, s1
-    distances = range(len(s1) + 1)
-    for i2, c2 in enumerate(s2):
-        distances_ = [i2+1]
-        for i1, c1 in enumerate(s1):
-            if c1 == c2:
-                distances_.append(distances[i1])
-            else:
-                distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
-        distances = distances_
-    return distances[-1]
-
-
-@app.route('/audiofeed')
-def audiofeed():
-    def gen(microphone):
-        while True:
-            sound = microphone.getSound()
-            #with open('tmp.wav', 'rb') as myfile:
-            #   yield myfile.read()
-
-            yield sound
-
-    return Response(stream_with_context(gen(Microphone())))
+@app.route('/logout')
+def logout():
+    logout_user()
+    return index()
 
 
 if __name__ == '__main__':

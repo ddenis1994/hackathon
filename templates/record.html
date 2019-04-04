@@ -10,6 +10,7 @@
 const mediaRecorder= null;
 $("#startRec").click(function(){
  document.getElementById("stopRec").disabled = false;
+
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
       const mediaRecorder = new MediaRecorder(stream);
@@ -22,14 +23,11 @@ $("#startRec").click(function(){
     navigator.mediaDevices.getUserMedia({ audio: true })
     mediaRecorder.stop();
       mediaRecorder.addEventListener("stop", () => {
-        const audioBlob = new Blob(audioChunks, {type : 'audio/mpeg-3'});
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audio.play();
+        const audioBlob = new Blob(audioChunks,{ 'type' : 'audio/wav' });
          $.ajax({
     type: 'POST',
     url: "{{ url_for('audio') }}",
-    data: audio,
+    data: audioBlob,
     processData: false,
     contentType: false,
     success: function(data) {

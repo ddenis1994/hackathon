@@ -7,8 +7,7 @@ volume_list=[]
 def audio_callback(indata, frames, time, status):
    volume_norm = np.linalg.norm(indata) * 10
    volume_list.append(int(volume_norm))
-   print("-" * int(volume_norm))
-   #print(int(volume_norm))
+   return ("-" * int(volume_norm))
    
    
 
