@@ -1,0 +1,82 @@
+{% extends 'status/admin_login.html' %}
+
+{% block header %}
+  <h1 align="center" style="color:dimgray">{% block title %}Admin Request{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<i id="messg" style="font-size:50px;color:gold"></i>
+<div class="container">
+    <form id="Add">
+        <table id="RequsetTable" class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">user requesting</th>
+                    <th scope="col">for user</th>
+                    <th scope="col">reason</th>
+                    <th scope="col">response</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for req in requests %}
+                <tr>
+
+                     <td>{{req.IDrequest}}</td>
+                    <td>{{req.requesting}}</td>
+                    <td>{{req.user}}</td>
+                    <td>{{req.reason}}</td>
+                     <td>
+                        <div class="btn-group" role="group">
+                            <button type="button" onclick="AdminAccept({{req}})" class="btn btn-success">accept</button>
+                            <button type="button" onclick="AdminDeny({{req}})" class="btn btn-warning">deny</button>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <input type="hidden" id="type_form" name="type_form" class="form-control" value="admin_answer">
+    </form>
+</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    function AdminAccept(req) {
+        $.post("/Submit1",req,test);
+        $.post("/GetRequestJson",null,FillTable)
+    }
+        function AdminDeny(req) {
+        $.post("/Submit2",req,test);
+        $.post("/GetRequestJson",null,FillTable)
+
+    }
+            function test(massge) {
+        alert(massge);
+        location.reload();
+
+
+    }
+        function FillTable(requests) {
+                $("#RequsetTable").find("tr:gt(0)").remove();
+                var tb1 = $("#RequsetTable");
+                obj = JSON.parse(requests).data;
+                for (k = 0; k < obj.length; k++){
+            var newRow = "<tr>" +
+                    "<td>"+obj[k].IDrequest+"</td>"+
+                    "<td>"+obj[k].requesting+"</td>"+
+                    "<td>"+obj[k].user+"</td>"+
+                    "<td>"+obj[k].reason+"</td>"+
+                     "<td>"+
+                        "<div class=\"btn-group\" role=\"group\">"+
+                            "<button type=\"button\" onclick=\"AdminAccept(obj[k])\" class=\"btn btn-success\">accept</button>"+
+                            "<button type=\"button\" onclick=\"AdminDeny(obj[k])\" class=\"btn btn-warning\">deny</button>"+
+                        "</div>"+
+                    "</td>"+
+                "</tr>";
+            tb1.append(newRow);
+        }
+
+
+    }
+</script>
+{% endblock %}

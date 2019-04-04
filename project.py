@@ -21,10 +21,10 @@ key = "NEDDNEDD"
 @app.before_first_request
 def create_user():
     init_db()
-    user_datastore.create_role(name='ADMIN')
-    db_session.commit()
-    user_datastore.create_user(email='admin', password=des('admin', key), roles=['ADMIN'])
-    db_session.commit()
+    #user_datastore.create_role(name='ADMIN')
+    #db_session.commit()
+    #user_datastore.create_user(email='admin', password=des('admin', key), roles=['ADMIN'])
+    #db_session.commit()
 
 
 
@@ -72,8 +72,9 @@ def register(user, password, permissions, Email):
     return index()
 
 
+@app.route('/get_sound')
 def get_sound():
-    return render_template('/')
+    return render_template('/record.html')
 
 
 @app.route('/handle_data', methods=['POST'])
@@ -83,8 +84,6 @@ def handle_data():
         return login(request.form['inputIdMain'], request.form['inputPasswordMain'])
     elif request.form['type_form'] == 'register':
         return register(request.form['Register_New_User'], request.form['Register_New_Password'],request.form['permissions'],request.form['Email'])
-    elif request.form['type_form'] == 'getSound':
-        return getSound()
     return index()
 
 
