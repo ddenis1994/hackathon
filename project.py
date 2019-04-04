@@ -21,14 +21,19 @@ key = "NEDDNEDD"
 @app.before_first_request
 def create_user():
     init_db()
-    #user_datastore.create_role(name='Normal')
-    #db_session.commit()
-    #user_datastore.create_role(name='Manager')
-    #db_session.commit()
-    #user_datastore.create_role(name='admin')
-    #db_session.commit()
-    #user_datastore.create_user(email='admin', password=des('admin', key), roles=['admin'])
-    #db_session.commit()
+    '''
+    user_datastore.create_role(name='Normal')
+    db_session.commit()
+    user_datastore.create_role(name='Manager')
+    db_session.commit()
+    user_datastore.create_role(name='admin')
+    db_session.commit()
+    user_datastore.create_user(username='admin', password=des('admin', key))
+    db_session.commit()
+    emp_user = User.query.filter_by(username='admin').first()
+    user_datastore.add_role_to_user(emp_user, 'admin')
+    db_session.commit()
+    '''
 
 
 
