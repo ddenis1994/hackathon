@@ -108,6 +108,7 @@ def test_main_game(client):
     userTemp = project.User.query.filter_by(username=username).first()
     project.user_datastore.delete_user(userTemp)
     project.db_session.commit()
+
     assert b'Log In' not in rv.data
 
 
