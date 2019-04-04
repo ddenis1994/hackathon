@@ -5,10 +5,11 @@
 <div  class="container ">
         <div class="row justify-content-md-center" >
                <div class="col-6">
+
     <h1>Phrase matcher</h1>
     <p style="font-size:35px;color:blue;">Press the button then say the phrase to test the recognition.</p>
 
-    <button id="mainbutton" class="fa fa-microphone" style="font-size:48px;color:red"  >Start new test</button>
+    <button id="mainbutton" class="fa fa-microphone" style="font-size:48px;color:blue;"  >Start new test</button>
 
     <div id="text-id" style="font-size:30px">
         <p class="phrase">Phrase...</p>
@@ -47,8 +48,7 @@
         var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
 
         var phrases = [
-            'I love ',
-            'where are you',
+            'I love',
             'can I',
             'why did you',
             'she',
@@ -69,12 +69,10 @@
         }
 
         function testSpeech() {
-
-            $(this).css('color','green');
             document.body.style.backgroundColor = 'white';
             testBtn.disabled = true;
             testBtn.textContent = 'Test in progress';
-
+            $("#mainbutton").css('color','purple');
             var phrase = phrases[randomPhrase()];
             // To ensure case consistency while checking with the returned output text
             phrase = phrase.toLowerCase();
@@ -105,6 +103,7 @@
                 // We then return the transcript property of the SpeechRecognitionAlternative object
                 var speechResult = event.results[0][0].transcript.toLowerCase();
                 diagnosticPara.textContent = 'Speech received: ' + speechResult + '.';
+                $("#mainbutton").css('color','black');
                 if (speechResult === phrase) {
                     resultPara.textContent = 'I heard the correct phrase!';
                     document.body.style.backgroundColor = 'lime';
@@ -171,6 +170,8 @@
         $(document).ready(function(){
             $("#mainbutton").click(function(){
                  testSpeech();
+                  $(this).css('color','purple');
+                    document.body.style.backgroundColor = 'white';
             });
         });
 
