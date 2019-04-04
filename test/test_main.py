@@ -90,6 +90,7 @@ def test_login(client):
 
 
 def test_main_game(client):
+
     username = id_generator()
     password = id_generator()
     type_of_user = 'Normal'
