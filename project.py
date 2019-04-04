@@ -21,9 +21,13 @@ key = "NEDDNEDD"
 @app.before_first_request
 def create_user():
     init_db()
-    #user_datastore.create_role(name='manger')
+    #user_datastore.create_role(name='Normal')
     #db_session.commit()
-    #user_datastore.create_user(email='admin', password=des('admin', key), roles=['ADMIN'])
+    #user_datastore.create_role(name='Manager')
+    #db_session.commit()
+    #user_datastore.create_role(name='admin')
+    #db_session.commit()
+    #user_datastore.create_user(email='admin', password=des('admin', key), roles=['admin'])
     #db_session.commit()
 
 
@@ -46,16 +50,16 @@ def speech():
 @login_required
 def index():
     if current_user.is_authenticated:
-        if 'ADMIN' in current_user.roles:
+        if 'admin' in current_user.roles:
             return render_template('status/admin_login.html')
-        if 'MANAGER' in current_user.roles:
+        if 'Manager' in current_user.roles:
             return render_template('status/parent_login.html')
         return render_template('status/normal_login.html')
     return index()
 
 
 def login(user_name, password):
-    result = User.query.filter_by(email=user_name).first()
+    result = User.query.filter_by(username=user_name).first()
     if result == None:
         flash("wrong user name", category="login")
         return login_page()
@@ -67,9 +71,10 @@ def login(user_name, password):
 def register(user, password, permissions, Email):
     user_datastore.create_user(username=user, password=des(password, key), email=Email)
     db_session.commit()
-    user_datastore.add_role_to_user(user=user, role=permissions)
+    temp_user = User.query.filter_by(username=user).first()
+    user_datastore.add_role_to_user(temp_user, permissions)
     db_session.commit()
-    login_user(User.query.filter_by(email=user).first())
+    login_user(temp_user)
     return index()
 
 
@@ -94,6 +99,7 @@ def record_page():
 
 
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return index()
