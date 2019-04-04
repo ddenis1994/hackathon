@@ -34,7 +34,7 @@ def test_register(client):
     project.db_session.commit()
     assert b'Log In' not in rv.data
 
-'''
+
 def test_login(client):
     username = id_generator()
     password = id_generator()
@@ -58,4 +58,3 @@ def test_login(client):
     assert b'Log In' in rv.data
 
 
-'''
