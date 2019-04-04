@@ -40,7 +40,7 @@ def test_login(client):
     password = id_generator()
     type_of_user = 'Normal'
     email = id_generator()+'@'+id_generator()
-    rv = client.post('/handle_data', data=dict(
+    client.post('/handle_data', data=dict(
         Register_New_User=username,
         Register_New_Password=password,
         permissions=type_of_user,
@@ -48,13 +48,66 @@ def test_login(client):
         type_form='register'
     ), follow_redirects=True)
 
-    rv = client.post('/logout', follow_redirects=True)
-    print(rv.data)
+    client.post('/logout', follow_redirects=True)
     rv = client.post('/handle_data', data=dict(
         inputIdMain=username,
         inputPasswordMain=password,
         type_form='login'
     ), follow_redirects=True)
-    assert b'Log In' in rv.data
+    assert b'Log In' not in rv.data
+    rv = client.post('/logout', follow_redirects=True)
+    userTemp = project.User.query.filter_by(username=username).first()
+    project.user_datastore.delete_user(userTemp)
+    project.db_session.commit()
+    assert b'Log In' not in rv.data
+
+
+def test_login(client):
+    username = id_generator()
+    password = id_generator()
+    type_of_user = 'Normal'
+    email = id_generator()+'@'+id_generator()
+    client.post('/handle_data', data=dict(
+        Register_New_User=username,
+        Register_New_Password=password,
+        permissions=type_of_user,
+        Email=email,
+        type_form='register'
+    ), follow_redirects=True)
+
+    client.post('/logout', follow_redirects=True)
+    rv = client.post('/handle_data', data=dict(
+        inputIdMain=username,
+        inputPasswordMain=password,
+        type_form='login'
+    ), follow_redirects=True)
+    assert b'Log In' not in rv.data
+    rv = client.post('/logout', follow_redirects=True)
+    userTemp = project.User.query.filter_by(username=username).first()
+    project.user_datastore.delete_user(userTemp)
+    project.db_session.commit()
+    assert b'Log In' not in rv.data
+
+
+def test_main_game(client):
+    username = id_generator()
+    password = id_generator()
+    type_of_user = 'Normal'
+    email = id_generator()+'@'+id_generator()
+    client.post('/handle_data', data=dict(
+        Register_New_User=username,
+        Register_New_Password=password,
+        permissions=type_of_user,
+        Email=email,
+        type_form='register'
+    ), follow_redirects=True)
+
+    rv = client.post('/get_sound', follow_redirects=True)
+    assert b'Press the button then say the ' not in rv.data
+    rv = client.post('/logout', follow_redirects=True)
+    userTemp = project.User.query.filter_by(username=username).first()
+    project.user_datastore.delete_user(userTemp)
+    project.db_session.commit()
+    assert b'Log In' not in rv.data
 
 

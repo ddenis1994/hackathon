@@ -42,6 +42,7 @@ def login_page():
     return render_template('security/login_user.html')
 
 @app.route('/speech')
+@login_required
 def speech():
     return render_template('/speech-to-text.html')
 
@@ -100,6 +101,7 @@ def handle_data():
 
 
 @app.route('/record_page')
+@login_required
 def record_page():
     return render_template('/record.html')
 
